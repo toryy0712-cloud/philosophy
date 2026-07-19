@@ -99,6 +99,14 @@
             border-bottom-right-radius: 0;
         }
 
+        .message.error {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border-left: 4px solid #e74c3c;
+            font-size: 1rem;
+            max-width: 90%;
+        }
+
         .message-name {
             font-size: 0.85rem;
             color: var(--text-muted);
@@ -158,7 +166,6 @@
 
     <div class="chat-container">
         <div class="chat-header">
-            <!-- 뒤로가기 버튼을 누르면 다시 메인 화면(/)으로 이동합니다 -->
             <button class="back-btn" onclick="window.location.href='/'">←</button>
             <h1 class="header-title" id="header-name">철학자 불러오는 중...</h1>
         </div>
@@ -175,8 +182,8 @@
     </div>
 
     <script>
-        // 발급받으신 Gemini API Key 적용
-        const GEMINI_API_KEY = 'AQ.Ab8RN6J3_lmSFdm8xb5GtAP1FJAKikEj5kpjiJrXwY39jVXymA';
+        // 알려주신 실제 API 키 적용
+        const GEMINI_API_KEY = 'AQ.Ab8RN6J3_lmSFdm8xb5GtAP1FJAKikEj5kpjiJrXwY39jVXymA'; 
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
         // 1. 이전 화면(index.html)에서 선택했던 철학자 이름 가져오기
@@ -230,7 +237,7 @@
         // 화면 켜지자마자 첫 인사말 출력
         appendMessage('philosopher', selectedId, currentPersona.greeting);
 
-        // Gemini API로 질문 전송하는 핵심 함수
+        // Gemini API 호출 핵심 함수 (서버 에러 원문 강제 추출 기능 적용)
         async function fetchGeminiReply(userText) {
             chatHistory.push({ role: "user", parts: [{ text: userText }] });
 
@@ -246,8 +253,10 @@
                     body: JSON.stringify(payload)
                 });
 
+                // 구글 서버가 반환하는 원본 JSON 에러 객체를 그대로 잡아냅니다.
                 if (!response.ok) {
-                    throw new Error('API 키가 올바르지 않거나 호출 한도를 초과했습니다.');
+                    const errorData = await response.json();
+                    throw new Error(JSON.stringify(errorData.error, null, 2));
                 }
 
                 const data = await response.json();
@@ -256,7 +265,8 @@
                 chatHistory.push({ role: "model", parts: [{ text: aiText }] });
                 return aiText;
             } catch (error) {
-                return "<i>(시스템 오류) " + error.message + "</i>";
+                // 추출된 에러를 붉은색의 상세 기록 텍스트로 가공하여 반환합니다.
+                return `<span style="font-weight:bold;">[통신 실패 상세 기록]</span><br><pre style="font-size:0.85rem; white-space: pre-wrap;">${error.message}</pre>`;
             }
         }
 
@@ -275,7 +285,14 @@
 
             loadingIndicator.style.display = 'none';
             sendBtn.disabled = false;
-            appendMessage('philosopher', selectedId, aiReply);
+            
+            // 만약 서버에서 넘어온 에러 상세 기록이 포함되어 있다면 에러 UI로 출력
+            if(aiReply.includes('[통신 실패 상세 기록]')) {
+                appendMessage('error philosopher', '시스템 알림 (개발자 진단)', aiReply);
+            } else {
+                appendMessage('philosopher', selectedId, aiReply);
+            }
+            
             userInput.focus();
         }
 
