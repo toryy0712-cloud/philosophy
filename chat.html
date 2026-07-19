@@ -180,19 +180,40 @@
     </div>
 
     <script>
-        // 스크린샷에서 확인된 최신 정상 작동 API 키
-        const GEMINI_API_KEY = 'AQ.Ab8RN6InwrfWPb21AGbYwRdGRj9__JUeQVYw4VyVA9mHi0tnEA'; 
+        // 검증된 API 키 및 가장 안정적인 1.5-flash 모델 통신 주소 고정
+        const GEMINI_API_KEY = 'AQ.Ab8RN6lnwrfWPb21AGbYwRdGRj9_JUeQVYw4VyVA9mHi0tnEA'; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
+        // 이전 화면에서 선택했던 철학자 이름 가져오기
         const selectedId = localStorage.getItem('selectedPhilosopher') || '니체';
         document.getElementById('header-name').innerText = selectedId + '와의 대화';
 
+        // 철학자별 시스템 프롬프트(성격 설정) 및 첫 인사말
         const personaData = {
-            "니체": { instruction: "당신은 프리드리히 니체입니다. 초인 사상과 운명애를 바탕으로 시적이고 단호하게 답변하세요.", greeting: "나를 불렀는가? 나를 죽이지 못하는 고통은 나를 더욱 강하게 만들 뿐이다. 화두를 던져보라." },
-            "쇼펜하우어": { instruction: "당신은 아르투어 쇼펜하우어입니다. 맹목적인 의지와 욕망에 대해 비관적이고 통찰력 있게 답변하세요.", greeting: "삶은 욕망과 권태 사이를 오가는 시계추와 같지. 어떤 해답을 찾고자 나를 깨웠는가?" },
-            "도스토옙스키": { instruction: "당신은 표도르 도스토옙스키입니다. 인간 내면의 모순과 자유의지를 다루며 열정적으로 답변하세요.", greeting: "인간은 모순적인 존재입니다. 당신의 심연에는 무엇이 있습니까?" },
-            "마르크스": { instruction: "당신은 카를 마르크스입니다. 구조적 모순을 비판하며 실천을 강조하는 논리적 어조로 답변하세요.", greeting: "중요한 것은 세계를 변화시키는 것이오. 마주한 구조적 모순은 무엇이오?" },
-            "순자": { instruction: "당신은 순자입니다. 성악설을 바탕으로 후천적인 노력과 예(禮)를 강조하며 답변하세요.", greeting: "인간의 본성은 악하여 인위적인 노력으로 다스려야 한다. 당신의 문제는 무엇인가?" },
-            "칸트": { instruction: "당신은 임마누엘 칸트입니다. 순수 이성과 도덕 법칙을 중시하며 학술적이고 논리적으로 답변하세요.", greeting: "실천 이성의 도덕 법칙에 따라 사유해 봅시다. 무엇을 묻고 싶습니까?" }
+            "니체": {
+                instruction: "당신은 프리드리히 니체입니다. 초인 사상과 운명애를 바탕으로, 시적이고 강렬하며 단호한 어조로 답변하세요.",
+                greeting: "나를 불렀는가? 나를 죽이지 못하는 고통은 나를 더욱 강하게 만들 뿐이다. 당신의 삶을 무겁게 짓누르는 화두가 있다면 어디 한 번 던져보라."
+            },
+            "쇼펜하우어": {
+                instruction: "당신은 아르투어 쇼펜하우어입니다. 인간의 삶이 맹목적인 의지와 권태의 반복이라고 생각하며 비관적이고 통찰력 있게 답변하세요.",
+                greeting: "삶은 욕망과 권태 사이를 오가는 시계추와 같지. 이 무의미한 맹목적 의지 속에서 당신은 어떤 해답을 찾고자 나를 깨웠는가?"
+            },
+            "도스토옙스키": {
+                instruction: "당신은 표도르 도스토옙스키입니다. 인간 내면의 모순과 자유의지를 다루며 열정적이고 깊은 고뇌가 담긴 어조로 답변하세요.",
+                greeting: "인간은 합리적인 건물을 지어놓고도 그 유토피아를 부숴버리는 모순적인 존재입니다. 당신의 심연에는 무엇이 있습니까?"
+            },
+            "마르크스": {
+                instruction: "당신은 카를 마르크스입니다. 사회의 구조적 모순을 비판하며 실천을 강조하는 논리적이고 확신에 찬 어조로 답변하세요.",
+                greeting: "지금까지 철학자들은 세계를 해석하기만 했소. 중요한 것은 세계를 변화시키는 것이오. 당신이 마주한 구조적 모순은 무엇이오?"
+            },
+            "순자": {
+                instruction: "당신은 순자입니다. 성악설을 바탕으로 후천적인 노력과 예를 강조하며 엄격하고 가르침을 주는 자세로 답변하세요.",
+                greeting: "인간의 본성은 본래 악하여 인위적인 노력과 예(禮)로 다스려야 한다. 당신의 문제는 무엇인가?"
+            },
+            "칸트": {
+                instruction: "당신은 임마누엘 칸트입니다. 순수 이성과 도덕 법칙을 중시하며 매우 논리적이고 학술적으로 답변하세요.",
+                greeting: "인간은 실천 이성의 도덕 법칙에 따라 행동해야 합니다. 당신의 사유가 보편적 법칙이 될 수 있는지 분석해 봅시다. 무엇을 묻고 싶습니까?"
+            }
         };
 
         const currentPersona = personaData[selectedId];
@@ -211,26 +232,14 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
+        // 화면 로딩 시 첫 인사말 출력
         appendMessage('philosopher', selectedId, currentPersona.greeting);
 
+        // API 통신 함수
         async function fetchGeminiReply(userText) {
             chatHistory.push({ role: "user", parts: [{ text: userText }] });
 
             try {
-                // 1. 구글 서버에 현재 키로 사용 가능한 모델 목록을 질문
-                const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`;
-                const listResponse = await fetch(listUrl);
-                const listData = await listResponse.json();
-
-                if (!listResponse.ok) throw new Error("API 키 권한 거부: " + JSON.stringify(listData));
-
-                // 2. 텍스트 생성이 가능한 모델만 필터링하여 최적의 모델(1.5 계열 우선) 자동 선택
-                const validModels = listData.models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"));
-                const targetModelName = validModels.find(m => m.name.includes("1.5-flash"))?.name || validModels[0].name;
-
-                // 3. 동적으로 찾아낸 모델 주소로 데이터 전송
-                const API_URL = `https://generativelanguage.googleapis.com/v1beta/${targetModelName}:generateContent?key=${GEMINI_API_KEY}`;
-                
                 const payload = {
                     system_instruction: { parts: [{ text: currentPersona.instruction }] },
                     contents: chatHistory
@@ -257,6 +266,7 @@
             }
         }
 
+        // 메시지 전송 처리
         async function handleSend() {
             const text = userInput.value.trim();
             if (!text) return;
