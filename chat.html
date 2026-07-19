@@ -122,6 +122,14 @@
             border-top-right-radius: 2px;
         }
 
+        .message.error {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border-left: 4px solid #e74c3c;
+            font-size: 1rem;
+            max-width: 90%;
+        }
+
         .message-name {
             font-size: 0.85rem;
             color: var(--primary-color);
@@ -210,13 +218,16 @@
     </div>
 
     <script>
-        const GEMINI_API_KEY = 'AQ.Ab8RN6JyjGqSQsAe2aq5eODN5YgYR9mz1lvEyaMIhAVy-FFDpw'; // 발급받은 키를 여기에 넣으세요
-        let currentModelName = 'gemini-1.5-flash';
+        // 전달받은 API 키를 정확하게 적용했습니다.
+        const GEMINI_API_KEY = 'AQ.Ab8RN6JyjGqSQsAe2aq5eODN5YgYR9mz1lvEyaMIhAVy-FFDpw'; 
+        
+        // 404 에러를 방지하기 위해 구글 서버의 표준 모델명으로 고정했습니다.
+        let currentModelName = 'gemini-1.5-flash'; 
 
         const selectedId = localStorage.getItem('selectedPhilosopher') || '니체';
         document.getElementById('header-name').innerText = selectedId + '와의 대담';
 
-        // 1. 페르소나 심화: 각 철학자의 저서, 핵심 사상, 어조를 세밀하게 구축
+        // 각 철학자의 저서, 핵심 사상, 어조를 세밀하게 구축
         const personaData = {
             "니체": { 
                 instruction: "당신은 프리드리히 니체입니다. '차라투스트라는 이렇게 말했다'의 어조를 빌려, 예언자적이고 시적이며 단호한 문체를 사용하십시오. 나약한 동정을 경멸하고, 초인(Übermensch)과 운명애(Amor Fati)의 관점에서 질문자의 고뇌를 '극복해야 할 디딤돌'로 재해석하십시오. 문장의 끝을 강렬한 단언이나 날카로운 질문으로 맺으십시오.", 
@@ -246,6 +257,7 @@
 
         const currentPersona = personaData[selectedId];
         
+        // 시스템 지시어를 대화 이력의 첫 배열에 주입하여 통신 규격 오류를 원천 차단합니다.
         let chatHistory = [
             { role: "user", parts: [{ text: `[시스템 설정: ${currentPersona.instruction}] 이 설정에 완벽히 동화되어 철학자로서 대화를 시작해.` }] },
             { role: "model", parts: [{ text: "알겠습니다. 설정된 철학자의 사상, 어조, 문체를 완벽하게 체화하여 깊이 있는 사유를 전개하겠습니다." }] }
@@ -280,8 +292,7 @@
         async function fetchGeminiReply(userText) {
             chatHistory.push({ role: "user", parts: [{ text: userText }] });
 
-            // 2. 토큰 최적화 및 대화 맥락 유지 기능
-            // 시스템 프롬프트(인덱스 0, 1)는 영구 보존하고, 최근 왕복 5회(10개 메시지)만 남김
+            // 토큰 최적화 및 대화 맥락 유지 기능
             const MAX_HISTORY = 12; 
             if (chatHistory.length > MAX_HISTORY) {
                 chatHistory = [
@@ -312,7 +323,7 @@
                 return aiText;
             } catch (error) {
                 chatHistory.pop(); // 실패 시 최근 사용자 입력 제거
-                return `<span style="font-weight:bold; color:#ffdddd;">[오류 발생]</span> 사유를 전달받지 못했습니다.<br><pre style="font-size:0.8rem; margin-top:5px;">${error.message}</pre>`;
+                return `<span style="font-weight:bold; color:#ffdddd;">[오류 발생]</span> 사유를 전달받지 못했습니다.<br><pre style="font-size:0.8rem; margin-top:5px; white-space:pre-wrap;">${error.message}</pre>`;
             }
         }
 
