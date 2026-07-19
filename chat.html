@@ -180,11 +180,10 @@
     </div>
 
     <script>
-        // API 키 변수는 그대로 유지
         const GEMINI_API_KEY = 'AQ.Ab8RN6J3_lmSFdm8xb5GtAP1FJAKikEj5kpjiJrXwY39jVXymA'; 
         
-        // 404 에러 해결: 모델 이름을 gemini-1.5-flash 에서 gemini-1.5-flash-latest 로 수정
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+        // 챗GPT가 제안한 대로 버전을 v1으로, 모델을 gemini-2.5-flash로 변경했습니다.
+        const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
         const selectedId = localStorage.getItem('selectedPhilosopher') || '니체';
         document.getElementById('header-name').innerText = selectedId + '와의 대화';
