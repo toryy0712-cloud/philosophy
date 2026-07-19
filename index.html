@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사유의 도서관 - 철학자 선택</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --primary-color: #bb86fc;
+            --text-main: #e0e0e0;
+            --text-muted: #9e9e9e;
+        }
+
+        body {
+            font-family: 'KoPub Batang', 'Malgun Gothic', serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 1rem 2rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 0 0 10px 0;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            padding: 2rem;
+            max-width: 1000px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .philosopher-card {
+            background-color: var(--surface-color);
+            border: 1px solid #333;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .philosopher-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(187, 134, 252, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            object-position: top;
+            filter: grayscale(80%) contrast(1.2);
+        }
+
+        .card-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .card-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+        }
+
+        .card-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+
+        .talk-btn {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-family: 'Pretendard', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .talk-btn:hover {
+            background-color: var(--primary-color);
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>심야의 대담</h1>
+        <div class="subtitle">위대한 사상가들과 당신의 삶을 논하십시오.</div>
+    </header>
+
+    <div class="grid-container" id="philosophers-grid">
+        <!-- 자바스크립트로 6명의 카드 자동 생성 -->
+    </div>
+
+    <script>
+        const philosophers = [
+            {
+                id: "니체",
+                name: "프리드리히 니체",
+                desc: "초인, 힘에의 의지, 운명애(Amor Fati)",
+                img: "https://upload.wikimedia.org/wikipedia/commons/1/1b/Nietzsche187a.jpg"
+            },
+            {
+                id: "쇼펜하우어",
+                name: "아르투어 쇼펜하우어",
+                desc: "맹목적 의지, 염세주의, 욕망과 권태",
+                img: "https://upload.wikimedia.org/wikipedia/commons/4/48/Arthur_Schopenhauer_by_J_Sch%C3%A4fer%2C_1859.jpg"
+            },
+            {
+                id: "도스토옙스키",
+                name: "표도르 도스토옙스키",
+                desc: "인간 심연, 자유의지, 죄와 구원",
+                img: "https://upload.wikimedia.org/wikipedia/commons/7/78/Vasily_Perov_-_%D0%9F%D0%BE%D1%80%D1%82%D1%80%D0%B5%D1%82_%D0%A4.%D0%9C.%D0%94%D0%BE%D1%81%D1%82%D0%BE%D0%B5%D0%B2%D1%81%D0%BA%D0%BE%D0%B3%D0%BE_-_Google_Art_Project.jpg"
+            },
+            {
+                id: "마르크스",
+                name: "카를 마르크스",
+                desc: "역사적 유물론, 구조 비판, 실천적 철학",
+                img: "https://upload.wikimedia.org/wikipedia/commons/d/d4/Karl_Marx_001.jpg"
+            },
+            {
+                id: "순자",
+                name: "순자 (荀子)",
+                desc: "성악설, 후천적 작위(僞), 예(禮)의 교화",
+                img: "https://upload.wikimedia.org/wikipedia/commons/6/69/Xunzi_portrait.jpg"
+            },
+            {
+                id: "칸트",
+                name: "임마누엘 칸트",
+                desc: "정언명령, 실천이성, 도덕적 의무",
+                img: "https://upload.wikimedia.org/wikipedia/commons/f/f2/Immanuel_Kant_%28painted_portrait%29.jpg"
+            }
+        ];
+
+        const grid = document.getElementById('philosophers-grid');
+
+        philosophers.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'philosopher-card';
+            card.innerHTML = `
+                <img src="${p.img}" alt="${p.name}" class="card-img" onerror="this.src='https://via.placeholder.com/300x220/2c2c2c/bb86fc?text=${p.id}'">
+                <div class="card-content">
+                    <h2 class="card-name">${p.name}</h2>
+                    <p class="card-desc">${p.desc}</p>
+                    <button class="talk-btn" onclick="startChat('${p.id}')">대화하기</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        function startChat(philosopherId) {
+            // 선택한 철학자를 로컬 저장소에 기억시키고, /chat 화면으로 이동명령을 내림
+            localStorage.setItem('selectedPhilosopher', philosopherId);
+            window.location.href = '/chat';
+        }
+    </script>
+</body>
+</html>
