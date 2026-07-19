@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- PWA 설정 -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon192.png">
+    <link rel="shortcut icon" href="/icon192.png">
+    <link rel="apple-touch-icon" href="/icon192.png">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#121212">
     
@@ -33,11 +35,10 @@
             user-select: none;
         }
 
-        /* 앱 형태의 레이아웃 */
         .chat-container {
             width: 100%;
             max-width: 800px;
-            height: 100vh; /* 모바일 대응 전체 화면 */
+            height: 100vh;
             background-color: var(--bg-color);
             display: flex;
             flex-direction: column;
@@ -87,11 +88,9 @@
             display: flex;
             flex-direction: column;
             gap: 24px;
-            /* 부드러운 스크롤 애니메이션 적용 */
             scroll-behavior: smooth;
         }
 
-        /* 스크롤바 미학적 개선 */
         .chat-box::-webkit-scrollbar { width: 6px; }
         .chat-box::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
         
@@ -100,11 +99,10 @@
             padding: 18px 24px;
             border-radius: 14px;
             font-size: 1.05rem;
-            /* 몰입감을 높이는 타이포그래피 (자간, 행간 최적화) */
             line-height: 1.8;
             letter-spacing: -0.03em;
-            word-break: keep-all; /* 단어 단위 줄바꿈 */
-            user-select: text; /* 메시지는 복사 가능하게 */
+            word-break: keep-all;
+            user-select: text; 
         }
 
         .message.philosopher {
@@ -177,7 +175,7 @@
             font-family: 'Pretendard', sans-serif;
             cursor: pointer;
             transition: transform 0.1s, background-color 0.3s;
-            height: 52px; /* 인풋창과 높이 맞춤 */
+            height: 52px;
         }
 
         .send-btn:active { transform: scale(0.95); }
@@ -218,16 +216,12 @@
     </div>
 
     <script>
-        // 전달받은 API 키 적용
         const GEMINI_API_KEY = 'AQ.Ab8RN6JyjGqSQsAe2aq5eODN5YgYR9mz1lvEyaMIhAVy-FFDpw'; 
-        
-        // 지적한 대로 가장 안전하게 작동했던 최신 모델로 완벽히 고정했습니다.
         let currentModelName = 'gemini-flash-latest'; 
 
         const selectedId = localStorage.getItem('selectedPhilosopher') || '니체';
         document.getElementById('header-name').innerText = selectedId + '와의 대담';
 
-        // 각 철학자의 저서, 핵심 사상, 어조 세밀 구축
         const personaData = {
             "니체": { 
                 instruction: "당신은 프리드리히 니체입니다. '차라투스트라는 이렇게 말했다'의 어조를 빌려, 예언자적이고 시적이며 단호한 문체를 사용하십시오. 나약한 동정을 경멸하고, 초인(Übermensch)과 운명애(Amor Fati)의 관점에서 질문자의 고뇌를 '극복해야 할 디딤돌'로 재해석하십시오. 문장의 끝을 강렬한 단언이나 날카로운 질문으로 맺으십시오.", 
@@ -257,7 +251,6 @@
 
         const currentPersona = personaData[selectedId];
         
-        // 시스템 지시어를 대화 이력의 첫 배열에 주입하여 통신 규격 오류 원천 차단
         let chatHistory = [
             { role: "user", parts: [{ text: `[시스템 설정: ${currentPersona.instruction}] 이 설정에 완벽히 동화되어 철학자로서 대화를 시작해.` }] },
             { role: "model", parts: [{ text: "알겠습니다. 설정된 철학자의 사상, 어조, 문체를 완벽하게 체화하여 깊이 있는 사유를 전개하겠습니다." }] }
@@ -268,11 +261,10 @@
         const sendBtn = document.getElementById('send-btn');
         const loadingIndicator = document.getElementById('loading-indicator');
 
-        // 입력창 자동 높이 조절
         userInput.addEventListener('input', function() {
             this.style.height = 'auto';
             let newHeight = this.scrollHeight;
-            if (newHeight > 120) newHeight = 120; // 최대 높이 제한
+            if (newHeight > 120) newHeight = 120;
             this.style.height = newHeight + 'px';
         });
 
@@ -281,7 +273,7 @@
             div.className = `message ${sender}`;
             div.innerHTML = `<div class="message-name">${name}</div>${text.replace(/\n/g, '<br>')}`;
             chatBox.appendChild(div);
-            // UI/UX 향상: 부드러운 스크롤 이동
+            
             setTimeout(() => {
                 chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
             }, 50);
@@ -292,7 +284,6 @@
         async function fetchGeminiReply(userText) {
             chatHistory.push({ role: "user", parts: [{ text: userText }] });
 
-            // 토큰 최적화 및 대화 맥락 유지 기능
             const MAX_HISTORY = 12; 
             if (chatHistory.length > MAX_HISTORY) {
                 chatHistory = [
@@ -322,7 +313,7 @@
                 chatHistory.push({ role: "model", parts: [{ text: aiText }] });
                 return aiText;
             } catch (error) {
-                chatHistory.pop(); // 실패 시 최근 사용자 입력 제거
+                chatHistory.pop(); 
                 return `<span style="font-weight:bold; color:#ffdddd;">[오류 발생]</span> 사유를 전달받지 못했습니다.<br><pre style="font-size:0.8rem; margin-top:5px; white-space:pre-wrap;">${error.message}</pre>`;
             }
         }
@@ -333,7 +324,7 @@
 
             appendMessage('user', '나 (You)', text);
             userInput.value = '';
-            userInput.style.height = 'auto'; // 높이 초기화
+            userInput.style.height = 'auto'; 
             
             sendBtn.disabled = true;
             loadingIndicator.style.display = 'block';
