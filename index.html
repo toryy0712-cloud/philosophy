@@ -2,7 +2,12 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- PWA 메타 태그 추가 -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#121212">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/192/bb86fc/000000?text=Phil">
+    
     <title>사유의 도서관 - 철학자 선택</title>
     <style>
         :root {
@@ -23,11 +28,14 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            /* 모바일 텍스트 드래그 방지(앱 느낌) */
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         header {
             text-align: center;
-            padding: 3rem 1rem 2rem;
+            padding: 4rem 1rem 2rem;
         }
 
         h1 {
@@ -39,6 +47,7 @@
         .subtitle {
             color: var(--text-muted);
             font-size: 1.1rem;
+            line-height: 1.6;
         }
 
         .grid-container {
@@ -49,6 +58,7 @@
             max-width: 1000px;
             width: 100%;
             box-sizing: border-box;
+            padding-bottom: 5rem;
         }
 
         .philosopher-card {
@@ -59,11 +69,12 @@
             display: flex;
             flex-direction: column;
             transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
         }
 
         .philosopher-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(187, 134, 252, 0.2);
+            box-shadow: 0 10px 20px rgba(187, 134, 252, 0.15);
             border-color: var(--primary-color);
         }
 
@@ -73,6 +84,7 @@
             object-fit: cover;
             object-position: top;
             filter: grayscale(80%) contrast(1.2);
+            pointer-events: none;
         }
 
         .card-content {
@@ -87,6 +99,7 @@
             font-size: 1.5rem;
             font-weight: bold;
             margin: 0 0 10px 0;
+            letter-spacing: -0.05em;
         }
 
         .card-desc {
@@ -94,6 +107,7 @@
             color: var(--text-muted);
             margin-bottom: 20px;
             flex-grow: 1;
+            line-height: 1.5;
         }
 
         .talk-btn {
@@ -105,11 +119,11 @@
             font-size: 1.1rem;
             font-family: 'Pretendard', sans-serif;
             font-weight: bold;
-            cursor: pointer;
             transition: all 0.3s;
+            pointer-events: none;
         }
 
-        .talk-btn:hover {
+        .philosopher-card:hover .talk-btn {
             background-color: var(--primary-color);
             color: #000;
         }
@@ -122,48 +136,23 @@
         <div class="subtitle">위대한 사상가들과 당신의 삶을 논하십시오.</div>
     </header>
 
-    <div class="grid-container" id="philosophers-grid">
-        <!-- 자바스크립트로 6명의 카드 자동 생성 -->
-    </div>
+    <div class="grid-container" id="philosophers-grid"></div>
 
     <script>
+        // 서비스 워커 등록 (웹 앱 기능 활성화)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+
         const philosophers = [
-            {
-                id: "니체",
-                name: "프리드리히 니체",
-                desc: "초인, 힘에의 의지, 운명애(Amor Fati)",
-                img: "https://upload.wikimedia.org/wikipedia/commons/1/1b/Nietzsche187a.jpg"
-            },
-            {
-                id: "쇼펜하우어",
-                name: "아르투어 쇼펜하우어",
-                desc: "맹목적 의지, 염세주의, 욕망과 권태",
-                img: "https://upload.wikimedia.org/wikipedia/commons/4/48/Arthur_Schopenhauer_by_J_Sch%C3%A4fer%2C_1859.jpg"
-            },
-            {
-                id: "도스토옙스키",
-                name: "표도르 도스토옙스키",
-                desc: "인간 심연, 자유의지, 죄와 구원",
-                img: "https://upload.wikimedia.org/wikipedia/commons/7/78/Vasily_Perov_-_%D0%9F%D0%BE%D1%80%D1%82%D1%80%D0%B5%D1%82_%D0%A4.%D0%9C.%D0%94%D0%BE%D1%81%D1%82%D0%BE%D0%B5%D0%B2%D1%81%D0%BA%D0%BE%D0%B3%D0%BE_-_Google_Art_Project.jpg"
-            },
-            {
-                id: "마르크스",
-                name: "카를 마르크스",
-                desc: "역사적 유물론, 구조 비판, 실천적 철학",
-                img: "https://upload.wikimedia.org/wikipedia/commons/d/d4/Karl_Marx_001.jpg"
-            },
-            {
-                id: "순자",
-                name: "순자 (荀子)",
-                desc: "성악설, 후천적 작위(僞), 예(禮)의 교화",
-                img: "https://upload.wikimedia.org/wikipedia/commons/6/69/Xunzi_portrait.jpg"
-            },
-            {
-                id: "칸트",
-                name: "임마누엘 칸트",
-                desc: "정언명령, 실천이성, 도덕적 의무",
-                img: "https://upload.wikimedia.org/wikipedia/commons/f/f2/Immanuel_Kant_%28painted_portrait%29.jpg"
-            }
+            { id: "니체", name: "프리드리히 니체", desc: "초인, 힘에의 의지, 운명애(Amor Fati)", img: "https://upload.wikimedia.org/wikipedia/commons/1/1b/Nietzsche187a.jpg" },
+            { id: "쇼펜하우어", name: "아르투어 쇼펜하우어", desc: "맹목적 의지, 염세주의, 욕망과 권태", img: "https://upload.wikimedia.org/wikipedia/commons/4/48/Arthur_Schopenhauer_by_J_Sch%C3%A4fer%2C_1859.jpg" },
+            { id: "도스토옙스키", name: "표도르 도스토옙스키", desc: "인간 심연, 자유의지, 죄와 구원", img: "https://upload.wikimedia.org/wikipedia/commons/7/78/Vasily_Perov_-_%D0%9F%D0%BE%D1%80%D1%82%D1%80%D0%B5%D1%82_%D0%A4.%D0%9C.%D0%94%D0%BE%D1%81%D1%82%D0%BE%D0%B5%D0%B2%D1%81%D0%BA%D0%BE%D0%B3%D0%BE_-_Google_Art_Project.jpg" },
+            { id: "마르크스", name: "카를 마르크스", desc: "역사적 유물론, 구조 비판, 실천적 철학", img: "https://upload.wikimedia.org/wikipedia/commons/d/d4/Karl_Marx_001.jpg" },
+            { id: "순자", name: "순자 (荀子)", desc: "성악설, 후천적 작위(僞), 예(禮)의 교화", img: "https://upload.wikimedia.org/wikipedia/commons/6/69/Xunzi_portrait.jpg" },
+            { id: "칸트", name: "임마누엘 칸트", desc: "정언명령, 실천이성, 도덕적 의무", img: "https://upload.wikimedia.org/wikipedia/commons/f/f2/Immanuel_Kant_%28painted_portrait%29.jpg" }
         ];
 
         const grid = document.getElementById('philosophers-grid');
@@ -171,21 +160,22 @@
         philosophers.forEach(p => {
             const card = document.createElement('div');
             card.className = 'philosopher-card';
+            // 카드 전체를 클릭 가능하게 변경 (모바일 앱 UX)
+            card.onclick = () => startChat(p.id);
             card.innerHTML = `
                 <img src="${p.img}" alt="${p.name}" class="card-img" onerror="this.src='https://via.placeholder.com/300x220/2c2c2c/bb86fc?text=${p.id}'">
                 <div class="card-content">
                     <h2 class="card-name">${p.name}</h2>
                     <p class="card-desc">${p.desc}</p>
-                    <button class="talk-btn" onclick="startChat('${p.id}')">대화하기</button>
+                    <button class="talk-btn">대화하기</button>
                 </div>
             `;
             grid.appendChild(card);
         });
 
         function startChat(philosopherId) {
-            // 선택한 철학자를 로컬 저장소에 기억시키고, /chat 화면으로 이동명령을 내림
             localStorage.setItem('selectedPhilosopher', philosopherId);
-            window.location.href = '/chat';
+            window.location.href = '/chat'; // Vercel cleanUrls 적용 시
         }
     </script>
 </body>

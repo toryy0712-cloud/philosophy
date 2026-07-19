@@ -1,0 +1,21 @@
+{
+  "name": "심야의 대담",
+  "short_name": "사유의공간",
+  "description": "위대한 사상가들과 당신의 삶을 논하십시오.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/bb86fc/000000?text=Phil",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512/bb86fc/000000?text=Philosophy",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

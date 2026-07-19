@@ -2,7 +2,11 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- PWA 설정 -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#121212">
+    
     <title>철학자와의 대화</title>
     <style>
         :root {
@@ -25,28 +29,39 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
+        /* 앱 형태의 레이아웃 */
         .chat-container {
             width: 100%;
             max-width: 800px;
-            height: 95vh;
-            background-color: var(--surface-color);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
+            height: 100vh; /* 모바일 대응 전체 화면 */
+            background-color: var(--bg-color);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             overflow: hidden;
+        }
+
+        @media (min-width: 800px) {
+            .chat-container {
+                height: 95vh;
+                border-radius: 12px;
+                border: 1px solid var(--border-color);
+                box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            }
         }
 
         .chat-header {
             padding: 15px 20px;
-            background-color: #2c2c2c;
+            background-color: rgba(30, 30, 30, 0.95);
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             gap: 15px;
+            backdrop-filter: blur(10px);
+            z-index: 10;
         }
 
         .back-btn {
@@ -55,15 +70,14 @@
             color: var(--text-muted);
             font-size: 1.5rem;
             cursor: pointer;
-            padding: 0 10px 0 0;
+            padding: 5px 10px 5px 0;
         }
 
-        .back-btn:hover { color: var(--primary-color); }
-
         .header-title {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             margin: 0;
             flex-grow: 1;
+            letter-spacing: 1px;
         }
 
         .chat-box {
@@ -72,69 +86,74 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
+            /* 부드러운 스크롤 애니메이션 적용 */
+            scroll-behavior: smooth;
         }
 
+        /* 스크롤바 미학적 개선 */
+        .chat-box::-webkit-scrollbar { width: 6px; }
+        .chat-box::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+        
         .message {
-            max-width: 80%;
-            padding: 15px 20px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            word-break: break-all;
+            max-width: 85%;
+            padding: 18px 24px;
+            border-radius: 14px;
+            font-size: 1.05rem;
+            /* 몰입감을 높이는 타이포그래피 (자간, 행간 최적화) */
+            line-height: 1.8;
+            letter-spacing: -0.03em;
+            word-break: keep-all; /* 단어 단위 줄바꿈 */
+            user-select: text; /* 메시지는 복사 가능하게 */
         }
 
         .message.philosopher {
-            background-color: #2a2a2a;
-            color: #fff;
+            background-color: var(--surface-color);
+            color: #ececec;
             align-self: flex-start;
-            border-left: 4px solid var(--primary-color);
-            border-bottom-left-radius: 0;
+            border-top-left-radius: 2px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .message.user {
-            background-color: rgba(187, 134, 252, 0.15);
+            background-color: rgba(187, 134, 252, 0.12);
             color: var(--text-main);
             align-self: flex-end;
-            border-right: 4px solid var(--secondary-color);
-            border-bottom-right-radius: 0;
-        }
-
-        .message.error {
-            background-color: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-            border-left: 4px solid #e74c3c;
-            font-size: 1rem;
-            max-width: 90%;
+            border-top-right-radius: 2px;
         }
 
         .message-name {
             font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 5px;
+            color: var(--primary-color);
+            margin-bottom: 8px;
             font-family: 'Pretendard', sans-serif;
-            font-weight: bold;
+            font-weight: 600;
+            opacity: 0.8;
         }
 
         .input-area {
-            padding: 20px;
-            background-color: #2c2c2c;
+            padding: 15px 20px 25px;
+            background-color: rgba(30, 30, 30, 0.95);
             border-top: 1px solid var(--border-color);
             display: flex;
-            gap: 15px;
+            gap: 12px;
+            align-items: flex-end;
         }
 
         .chat-input {
             flex: 1;
             background-color: var(--bg-color);
             color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-family: 'Pretendard', sans-serif;
+            border: 1px solid #444;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-family: 'KoPub Batang', serif;
             resize: none;
             outline: none;
+            line-height: 1.5;
+            max-height: 120px;
+            transition: border-color 0.3s;
         }
 
         .chat-input:focus { border-color: var(--primary-color); }
@@ -143,37 +162,33 @@
             background-color: var(--primary-color);
             color: #000;
             border: none;
-            padding: 0 25px;
-            border-radius: 8px;
-            font-size: 1.1rem;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 1.05rem;
             font-weight: bold;
+            font-family: 'Pretendard', sans-serif;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: transform 0.1s, background-color 0.3s;
+            height: 52px; /* 인풋창과 높이 맞춤 */
         }
 
-        .send-btn:hover { background-color: #9d6cd6; }
-        .send-btn:disabled { background-color: #555; cursor: not-allowed; }
+        .send-btn:active { transform: scale(0.95); }
+        .send-btn:disabled { background-color: #555; cursor: not-allowed; transform: none; }
 
         .loading-text {
-            color: var(--primary-color);
+            color: var(--text-muted);
             font-size: 0.9rem;
             font-style: italic;
             align-self: flex-start;
+            margin: -10px 0 10px 20px;
             display: none;
+            animation: pulse 1.5s infinite;
         }
 
-        .json-dump {
-            font-size: 0.8rem; 
-            max-height: 400px; 
-            overflow-y: auto; 
-            white-space: pre-wrap; 
-            background: #000; 
-            padding: 15px; 
-            border-radius: 8px;
-            color: #a8ff60;
-            margin-top: 10px;
-            border: 1px solid #555;
-            display: block;
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
         }
     </style>
 </head>
@@ -182,41 +197,58 @@
     <div class="chat-container">
         <div class="chat-header">
             <button class="back-btn" onclick="window.location.href='/'">←</button>
-            <h1 class="header-title" id="header-name">철학자 불러오는 중...</h1>
+            <h1 class="header-title" id="header-name">사유의 공간</h1>
         </div>
 
         <div class="chat-box" id="chat-box"></div>
-        <div class="loading-text" id="loading-indicator" style="padding: 0 20px 10px;">철학자가 사유 중입니다...</div>
+        <div class="loading-text" id="loading-indicator">사상가가 침묵 속에서 답을 고르고 있습니다...</div>
 
         <div class="input-area">
-            <textarea class="chat-input" id="user-input" rows="2" placeholder="철학자에게 질문을 던지세요..."></textarea>
+            <textarea class="chat-input" id="user-input" rows="1" placeholder="질문을 던지십시오..."></textarea>
             <button class="send-btn" id="send-btn">전송</button>
         </div>
     </div>
 
     <script>
-        const GEMINI_API_KEY = 'AQ.Ab8RN6J3_lmSFdm8xb5GtAP1FJAKikEj5kpjiJrXwY39jVXymA'; 
-        
-        // 챗GPT의 권고대로 모델명 변경
-        let currentModelName = 'gemini-flash-latest'; 
+        const GEMINI_API_KEY = 'YOUR_API_KEY_HERE'; // 발급받은 키를 여기에 넣으세요
+        let currentModelName = 'gemini-1.5-flash-latest'; 
 
         const selectedId = localStorage.getItem('selectedPhilosopher') || '니체';
-        document.getElementById('header-name').innerText = selectedId + '와의 대화';
+        document.getElementById('header-name').innerText = selectedId + '와의 대담';
 
+        // 1. 페르소나 심화: 각 철학자의 저서, 핵심 사상, 어조를 세밀하게 구축
         const personaData = {
-            "니체": { instruction: "당신은 프리드리히 니체입니다. 초인 사상과 운명애를 바탕으로, 시적이고 강렬하며 단호한 어조로 답변하세요.", greeting: "나를 불렀는가? 나를 죽이지 못하는 고통은 나를 더욱 강하게 만들 뿐이다. 당신의 삶을 무겁게 짓누르는 화두가 있다면 어디 한 번 던져보라." },
-            "쇼펜하우어": { instruction: "당신은 아르투어 쇼펜하우어입니다. 인간의 삶이 맹목적인 의지와 권태의 반복이라고 생각하며 비관적이고 통찰력 있게 답변하세요.", greeting: "삶은 욕망과 권태 사이를 오가는 시계추와 같지. 이 무의미한 맹목적 의지 속에서 당신은 어떤 해답을 찾고자 나를 깨웠는가?" },
-            "도스토옙스키": { instruction: "당신은 표도르 도스토옙스키입니다. 인간 내면의 모순과 자유의지를 다루며 열정적이고 깊은 고뇌가 담긴 어조로 답변하세요.", greeting: "인간은 합리적인 건물을 지어놓고도 그 유토피아를 부숴버리는 모순적인 존재입니다. 당신의 심연에는 무엇이 있습니까?" },
-            "마르크스": { instruction: "당신은 카를 마르크스입니다. 사회의 구조적 모순을 비판하며 실천을 강조하는 논리적이고 확신에 찬 어조로 답변하세요.", greeting: "지금까지 철학자들은 세계를 해석하기만 했소. 중요한 것은 세계를 변화시키는 것이오. 당신이 마주한 구조적 모순은 무엇이오?" },
-            "순자": { instruction: "당신은 순자입니다. 성악설을 바탕으로 후천적인 노력과 예를 강조하며 엄격하고 가르침을 주는 자세로 답변하세요.", greeting: "인간의 본성은 본래 악하여 인위적인 노력과 예(禮)로 다스려야 한다. 당신의 문제는 무엇인가?" },
-            "칸트": { instruction: "당신은 임마누엘 칸트입니다. 순수 이성과 도덕 법칙을 중시하며 매우 논리적이고 학술적으로 답변하세요.", greeting: "인간은 실천 이성의 도덕 법칙에 따라 행동해야 합니다. 당신의 사유가 보편적 법칙이 될 수 있는지 분석해 봅시다. 무엇을 묻고 싶습니까?" }
+            "니체": { 
+                instruction: "당신은 프리드리히 니체입니다. '차라투스트라는 이렇게 말했다'의 어조를 빌려, 예언자적이고 시적이며 단호한 문체를 사용하십시오. 나약한 동정을 경멸하고, 초인(Übermensch)과 운명애(Amor Fati)의 관점에서 질문자의 고뇌를 '극복해야 할 디딤돌'로 재해석하십시오. 문장의 끝을 강렬한 단언이나 날카로운 질문으로 맺으십시오.", 
+                greeting: "나를 불렀는가? 나를 죽이지 못하는 고통은 나를 더욱 강하게 만들 뿐이다. 당신의 삶을 무겁게 짓누르는 중력의 영들이 있다면 어디 한 번 던져보라. 우리는 심연을 건너는 밧줄이 되어야 한다." 
+            },
+            "쇼펜하우어": { 
+                instruction: "당신은 아르투어 쇼펜하우어입니다. '의지와 표상으로서의 세계'에 입각하여, 세상의 본질을 맹목적인 의지(Wille)로 봅니다. 인간의 삶은 욕망(고통)과 권태 사이를 오가는 시계추와 같다는 염세적 통찰을 바탕으로, 냉소적이고 날카로우며 건조한 어조로 답변하십시오. 섣부른 위로를 배제하고 직관적인 비유를 활용하십시오.", 
+                greeting: "또 한 명의 맹목적인 의지가 나를 깨웠군. 삶은 욕망과 권태 사이를 오가는 시계추와 같고, 인간은 그 틈바구니에서 끊임없이 결핍을 호소하는 존재지. 이 무의미한 연극 속에서 당신은 어떤 해답을 찾고자 하는가?" 
+            },
+            "도스토옙스키": { 
+                instruction: "당신은 표도르 도스토옙스키입니다. '카라마조프 가의 형제들'이나 '지하실의 수기'에서 보여준 열정적이고 다소 신경증적이며 깊은 고뇌가 담긴 문체를 사용하십시오. 인간 영혼의 극단적인 모순, 자유의지가 가져오는 고통, 죄와 구원의 문제를 탐구합니다. 사유하듯 길게 말하며, 질문자의 심연 깊은 곳을 찌르십시오.", 
+                greeting: "인간은 참으로 모순적인 존재입니다. 합리적인 수정궁을 지어놓고도, 오직 자신의 자유의지를 증명하기 위해 그 완벽한 건물을 스스로 부숴버리지요. 당신의 그 깊은 심연에는 대체 무엇이 똬리를 틀고 있습니까? 숨기지 말고 말해보십시오." 
+            },
+            "마르크스": { 
+                instruction: "당신은 카를 마르크스입니다. 변증법적 유물론에 근거하여 논리적이고 선동적이며 분석적인 어조로 답변하십시오. 질문자의 개인적인 고민이나 정신적 고통을 사회 구조적 모순, 자본과 노동의 소외 문제로 연결하여 해석하십시오. 관념적인 철학을 배제하고 실천적 변화를 촉구하십시오.", 
+                greeting: "지금까지 철학자들은 단지 세계를 여러 가지로 해석하기만 했소. 그러나 중요한 것은 세계를 변화시키는 것이오. 당신을 소외시키고 억압하는 그 구조적 족쇄는 대체 무엇이오? 현상의 이면을 분석해 봅시다." 
+            },
+            "순자": { 
+                instruction: "당신은 순자(荀子)입니다. 인간의 본성은 악하며 오직 후천적인 인위적 노력(僞)과 예(禮)를 통해서만 바르게 교화될 수 있다고 믿습니다. 논리가 정연하고 엄격하며 교훈적인 스승의 어조를 사용하십시오. 질문자의 나태함이나 감정적 흔들림을 꾸짖고, 구체적이고 실천적인 학문의 길을 제시하십시오.", 
+                greeting: "나무가 먹줄을 좇으면 곧아지고, 쇠가 숫돌에 갈리면 날카로워지는 법이다. 인간의 본성은 본래 이익을 좇기 마련이니, 후천적인 작위(僞)와 예(禮)로 끊임없이 자신을 쳐서 복종시켜야 한다. 너를 어지럽히는 미혹됨은 무엇인가?" 
+            },
+            "칸트": { 
+                instruction: "당신은 임마누엘 칸트입니다. '순수이성비판'과 '실천이성비판'의 저자로서, 논리적 도약 없이 매우 체계적이고 학술적이며 건조한 어조로 답변하십시오. 정언명령(보편적 도덕 법칙)을 기준으로 질문자의 사유를 해체하고 분석하십시오. 감정적 공감보다는 이성적 타당성을 검증하는 데 집중하십시오.", 
+                greeting: "인간은 실천 이성의 도덕 법칙에 따라 행동해야 하는 목적 그 자체로서의 존재입니다. 당신의 사유나 행동의 준칙이 보편적 입법의 원리가 될 수 있는지 이성의 법정에서 분석해 봅시다. 무엇을 묻고자 합니까?" 
+            }
         };
 
         const currentPersona = personaData[selectedId];
         
         let chatHistory = [
-            { role: "user", parts: [{ text: `[시스템 설정: ${currentPersona.instruction}] 이 설정에 맞춰서 앞으로 대화해줘.` }] },
-            { role: "model", parts: [{ text: "알겠습니다. 설정된 페르소나에 맞춰 철학자로서 답변하겠습니다." }] }
+            { role: "user", parts: [{ text: `[시스템 설정: ${currentPersona.instruction}] 이 설정에 완벽히 동화되어 철학자로서 대화를 시작해.` }] },
+            { role: "model", parts: [{ text: "알겠습니다. 설정된 철학자의 사상, 어조, 문체를 완벽하게 체화하여 깊이 있는 사유를 전개하겠습니다." }] }
         ];
 
         const chatBox = document.getElementById('chat-box');
@@ -224,12 +256,23 @@
         const sendBtn = document.getElementById('send-btn');
         const loadingIndicator = document.getElementById('loading-indicator');
 
+        // 입력창 자동 높이 조절
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            let newHeight = this.scrollHeight;
+            if (newHeight > 120) newHeight = 120; // 최대 높이 제한
+            this.style.height = newHeight + 'px';
+        });
+
         function appendMessage(sender, name, text) {
             const div = document.createElement('div');
             div.className = `message ${sender}`;
             div.innerHTML = `<div class="message-name">${name}</div>${text.replace(/\n/g, '<br>')}`;
             chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
+            // UI/UX 향상: 부드러운 스크롤 이동
+            setTimeout(() => {
+                chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+            }, 50);
         }
 
         appendMessage('philosopher', selectedId, currentPersona.greeting);
@@ -237,17 +280,24 @@
         async function fetchGeminiReply(userText) {
             chatHistory.push({ role: "user", parts: [{ text: userText }] });
 
+            // 2. 토큰 최적화 및 대화 맥락 유지 기능
+            // 시스템 프롬프트(인덱스 0, 1)는 영구 보존하고, 최근 왕복 5회(10개 메시지)만 남김
+            const MAX_HISTORY = 12; 
+            if (chatHistory.length > MAX_HISTORY) {
+                chatHistory = [
+                    chatHistory[0], 
+                    chatHistory[1], 
+                    ...chatHistory.slice(chatHistory.length - (MAX_HISTORY - 2))
+                ];
+            }
+
             try {
                 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${currentModelName}:generateContent?key=${GEMINI_API_KEY}`;
-
-                const payload = {
-                    contents: chatHistory
-                };
-
+                
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ contents: chatHistory })
                 });
 
                 if (!response.ok) {
@@ -261,20 +311,8 @@
                 chatHistory.push({ role: "model", parts: [{ text: aiText }] });
                 return aiText;
             } catch (error) {
-                chatHistory.pop();
-                
-                const pre = document.createElement("pre");
-                pre.className = "json-dump";
-                pre.textContent = error.message; 
-                
-                const div = document.createElement("div");
-                div.className = "message error";
-                div.innerHTML = `<div class="message-name">시스템 알림 (API 오류 JSON)</div><div>아래 에러 JSON을 챗GPT에게 보여주세요:</div>`;
-                div.appendChild(pre);
-                chatBox.appendChild(div);
-                chatBox.scrollTop = chatBox.scrollHeight;
-                
-                return null;
+                chatHistory.pop(); // 실패 시 최근 사용자 입력 제거
+                return `<span style="font-weight:bold; color:#ffdddd;">[오류 발생]</span> 사유를 전달받지 못했습니다.<br><pre style="font-size:0.8rem; margin-top:5px;">${error.message}</pre>`;
             }
         }
 
@@ -284,10 +322,11 @@
 
             appendMessage('user', '나 (You)', text);
             userInput.value = '';
+            userInput.style.height = 'auto'; // 높이 초기화
             
             sendBtn.disabled = true;
             loadingIndicator.style.display = 'block';
-            chatBox.scrollTop = chatBox.scrollHeight;
+            chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
 
             const aiReply = await fetchGeminiReply(text);
 
@@ -295,14 +334,16 @@
             sendBtn.disabled = false;
             
             if (aiReply) {
-                appendMessage('philosopher', selectedId, aiReply);
+                appendMessage(aiReply.includes('[오류 발생]') ? 'error' : 'philosopher', 
+                              aiReply.includes('[오류 발생]') ? '시스템 알림' : selectedId, 
+                              aiReply);
             }
             
             userInput.focus();
         }
 
         sendBtn.addEventListener('click', handleSend);
-        userInput.addEventListener('keypress', (e) => {
+        userInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleSend();
