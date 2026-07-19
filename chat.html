@@ -180,11 +180,10 @@
     </div>
 
     <script>
-        // 영상에서 새로 발급받으신 새 규격의 AQ API 키 (필요시 교체 가능)
         const GEMINI_API_KEY = 'AQ.Ab8RN6JyjGQ5qsAe2aqSeC0DN5yGR9mz1lvEyaMihAvy-FFDpw'; 
         
-        // 주의: 새 규격에서는 주소 끝에 ?key= 부분을 절대로 넣지 않습니다.
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
+        // 올바른 통신을 위해 URL 끝에 ?key= 파라미터 형태로 API 키를 전달합니다.
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
         const selectedId = localStorage.getItem('selectedPhilosopher') || '니체';
         document.getElementById('header-name').innerText = selectedId + '와의 대화';
@@ -216,7 +215,6 @@
 
         appendMessage('philosopher', selectedId, currentPersona.greeting);
 
-        // 핵심: AQ 키를 헤더(Header) 방식으로 전송하도록 수정한 통신 로직
         async function fetchGeminiReply(userText) {
             chatHistory.push({ role: "user", parts: [{ text: userText }] });
 
@@ -229,8 +227,8 @@
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 
-                        'Content-Type': 'application/json',
-                        'x-goog-api-key': GEMINI_API_KEY // ★ 새 AQ 규격은 반드시 이렇게 헤더로 보내야 합니다!
+                        'Content-Type': 'application/json'
+                        // 에러를 유발하던 x-goog-api-key 헤더 전송 방식을 삭제했습니다.
                     },
                     body: JSON.stringify(payload)
                 });
