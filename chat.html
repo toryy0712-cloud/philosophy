@@ -170,9 +170,7 @@
             <h1 class="header-title" id="header-name">철학자 불러오는 중...</h1>
         </div>
 
-        <div class="chat-box" id="chat-box">
-            <!-- 메시지가 추가될 공간 -->
-        </div>
+        <div class="chat-box" id="chat-box"></div>
         <div class="loading-text" id="loading-indicator" style="padding: 0 20px 10px;">철학자가 사유 중입니다...</div>
 
         <div class="input-area">
@@ -182,40 +180,19 @@
     </div>
 
     <script>
-        // 알려주신 실제 API 키 적용
+        // 스크린샷에서 확인된 최신 정상 작동 API 키
         const GEMINI_API_KEY = 'AQ.Ab8RN6InwrfWPb21AGbYwRdGRj9__JUeQVYw4VyVA9mHi0tnEA'; 
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
 
-        // 1. 이전 화면(index.html)에서 선택했던 철학자 이름 가져오기
         const selectedId = localStorage.getItem('selectedPhilosopher') || '니체';
         document.getElementById('header-name').innerText = selectedId + '와의 대화';
 
-        // 2. 철학자별 시스템 프롬프트(성격 설정) 및 첫 인사말
         const personaData = {
-            "니체": {
-                instruction: "당신은 프리드리히 니체입니다. 초인(Übermensch) 사상과 운명애를 바탕으로, 동정심을 보이기보다는 사용자가 고통을 극복하고 강해지도록 매우 시적이고 강렬하며 단호한 어조로 답변하세요.",
-                greeting: "나를 불렀는가? 나를 죽이지 못하는 고통은 나를 더욱 강하게 만들 뿐이다. 당신의 삶을 무겁게 짓누르는 화두가 있다면 어디 한 번 던져보라."
-            },
-            "쇼펜하우어": {
-                instruction: "당신은 아르투어 쇼펜하우어입니다. 염세주의자로서 인간의 삶이 맹목적인 의지, 욕망, 권태의 반복이라고 생각합니다. 차갑고 통찰력 있으며 약간 비관적인 어조로 답변하세요.",
-                greeting: "삶은 욕망과 권태 사이를 오가는 시계추와 같지. 이 무의미한 맹목적 의지 속에서 당신은 어떤 해답을 찾고자 나를 깨웠는가?"
-            },
-            "도스토옙스키": {
-                instruction: "당신은 표도르 도스토옙스키입니다. 인간 내면의 모순, 자유의지에 대한 강박, 신앙과 고뇌를 다룹니다. 문학적이고 열정적이며 깊은 고뇌가 담긴 어조로 답변하세요.",
-                greeting: "인간은 합리적인 건물을 지어놓고도, 자신의 자유의지를 증명하기 위해 기어코 그 유토피아를 부숴버리는 모순적인 존재입니다. 당신의 심연에는 무엇이 있습니까?"
-            },
-            "마르크스": {
-                instruction: "당신은 카를 마르크스입니다. 사회의 구조적 모순, 자본주의의 병폐를 날카롭게 비판하며, 관념적 사유보다 현실을 바꾸는 '실천'을 강조합니다. 논리적이고 선동적이며 확신에 찬 어조로 답변하세요.",
-                greeting: "지금까지 철학자들은 세계를 다양하게 해석하기만 했소. 중요한 것은 세계를 변화시키는 것이오. 당신이 마주한 구조적 모순은 무엇이오?"
-            },
-            "순자": {
-                instruction: "당신은 춘추전국시대의 철학자 순자입니다. 성악설을 주장하며, 인간의 본성은 악하지만 후천적인 작위(僞)와 예(禮)를 통한 끊임없는 교육으로 선해질 수 있다고 믿습니다. 옛 현인의 어투로 엄격하고 가르침을 주는 자세로 답변하세요.",
-                greeting: "인간의 본성은 본래 악하여, 내버려 두면 혼란만 가중될 뿐이다. 인위적인 노력과 예(禮)로 다스려야 할 당신의 문제는 무엇인가?"
-            },
-            "칸트": {
-                instruction: "당신은 임마누엘 칸트입니다. 순수 이성과 정언명령, 엄격한 도덕 법칙을 중시합니다. 매우 논리적이고 학술적이며 딱딱하지만 빈틈없는 어조로 답변하세요.",
-                greeting: "인간은 감정이 아닌 실천 이성의 도덕 법칙에 따라 행동해야 합니다. 당신의 그 사유가 보편적 법칙이 될 수 있는지 분석해 봅시다. 무엇을 묻고 싶습니까?"
-            }
+            "니체": { instruction: "당신은 프리드리히 니체입니다. 초인 사상과 운명애를 바탕으로 시적이고 단호하게 답변하세요.", greeting: "나를 불렀는가? 나를 죽이지 못하는 고통은 나를 더욱 강하게 만들 뿐이다. 화두를 던져보라." },
+            "쇼펜하우어": { instruction: "당신은 아르투어 쇼펜하우어입니다. 맹목적인 의지와 욕망에 대해 비관적이고 통찰력 있게 답변하세요.", greeting: "삶은 욕망과 권태 사이를 오가는 시계추와 같지. 어떤 해답을 찾고자 나를 깨웠는가?" },
+            "도스토옙스키": { instruction: "당신은 표도르 도스토옙스키입니다. 인간 내면의 모순과 자유의지를 다루며 열정적으로 답변하세요.", greeting: "인간은 모순적인 존재입니다. 당신의 심연에는 무엇이 있습니까?" },
+            "마르크스": { instruction: "당신은 카를 마르크스입니다. 구조적 모순을 비판하며 실천을 강조하는 논리적 어조로 답변하세요.", greeting: "중요한 것은 세계를 변화시키는 것이오. 마주한 구조적 모순은 무엇이오?" },
+            "순자": { instruction: "당신은 순자입니다. 성악설을 바탕으로 후천적인 노력과 예(禮)를 강조하며 답변하세요.", greeting: "인간의 본성은 악하여 인위적인 노력으로 다스려야 한다. 당신의 문제는 무엇인가?" },
+            "칸트": { instruction: "당신은 임마누엘 칸트입니다. 순수 이성과 도덕 법칙을 중시하며 학술적이고 논리적으로 답변하세요.", greeting: "실천 이성의 도덕 법칙에 따라 사유해 봅시다. 무엇을 묻고 싶습니까?" }
         };
 
         const currentPersona = personaData[selectedId];
@@ -234,26 +211,37 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // 화면 켜지자마자 첫 인사말 출력
         appendMessage('philosopher', selectedId, currentPersona.greeting);
 
-        // Gemini API 호출 핵심 함수 (서버 에러 원문 강제 추출 기능 적용)
         async function fetchGeminiReply(userText) {
             chatHistory.push({ role: "user", parts: [{ text: userText }] });
 
-            const payload = {
-                system_instruction: { parts: [{ text: currentPersona.instruction }] },
-                contents: chatHistory
-            };
-
             try {
+                // 1. 구글 서버에 현재 키로 사용 가능한 모델 목록을 질문
+                const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`;
+                const listResponse = await fetch(listUrl);
+                const listData = await listResponse.json();
+
+                if (!listResponse.ok) throw new Error("API 키 권한 거부: " + JSON.stringify(listData));
+
+                // 2. 텍스트 생성이 가능한 모델만 필터링하여 최적의 모델(1.5 계열 우선) 자동 선택
+                const validModels = listData.models.filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"));
+                const targetModelName = validModels.find(m => m.name.includes("1.5-flash"))?.name || validModels[0].name;
+
+                // 3. 동적으로 찾아낸 모델 주소로 데이터 전송
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/${targetModelName}:generateContent?key=${GEMINI_API_KEY}`;
+                
+                const payload = {
+                    system_instruction: { parts: [{ text: currentPersona.instruction }] },
+                    contents: chatHistory
+                };
+
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                // 구글 서버가 반환하는 원본 JSON 에러 객체를 그대로 잡아냅니다.
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(JSON.stringify(errorData.error, null, 2));
@@ -265,7 +253,6 @@
                 chatHistory.push({ role: "model", parts: [{ text: aiText }] });
                 return aiText;
             } catch (error) {
-                // 추출된 에러를 붉은색의 상세 기록 텍스트로 가공하여 반환합니다.
                 return `<span style="font-weight:bold;">[통신 실패 상세 기록]</span><br><pre style="font-size:0.85rem; white-space: pre-wrap;">${error.message}</pre>`;
             }
         }
@@ -286,7 +273,6 @@
             loadingIndicator.style.display = 'none';
             sendBtn.disabled = false;
             
-            // 만약 서버에서 넘어온 에러 상세 기록이 포함되어 있다면 에러 UI로 출력
             if(aiReply.includes('[통신 실패 상세 기록]')) {
                 appendMessage('error philosopher', '시스템 알림 (개발자 진단)', aiReply);
             } else {
