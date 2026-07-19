@@ -218,16 +218,16 @@
     </div>
 
     <script>
-        // 전달받은 API 키를 정확하게 적용했습니다.
+        // 전달받은 API 키 적용
         const GEMINI_API_KEY = 'AQ.Ab8RN6JyjGqSQsAe2aq5eODN5YgYR9mz1lvEyaMIhAVy-FFDpw'; 
         
-        // 404 에러를 방지하기 위해 구글 서버의 표준 모델명으로 고정했습니다.
-        let currentModelName = 'gemini-1.5-flash'; 
+        // 지적한 대로 가장 안전하게 작동했던 최신 모델로 완벽히 고정했습니다.
+        let currentModelName = 'gemini-flash-latest'; 
 
         const selectedId = localStorage.getItem('selectedPhilosopher') || '니체';
         document.getElementById('header-name').innerText = selectedId + '와의 대담';
 
-        // 각 철학자의 저서, 핵심 사상, 어조를 세밀하게 구축
+        // 각 철학자의 저서, 핵심 사상, 어조 세밀 구축
         const personaData = {
             "니체": { 
                 instruction: "당신은 프리드리히 니체입니다. '차라투스트라는 이렇게 말했다'의 어조를 빌려, 예언자적이고 시적이며 단호한 문체를 사용하십시오. 나약한 동정을 경멸하고, 초인(Übermensch)과 운명애(Amor Fati)의 관점에서 질문자의 고뇌를 '극복해야 할 디딤돌'로 재해석하십시오. 문장의 끝을 강렬한 단언이나 날카로운 질문으로 맺으십시오.", 
@@ -257,7 +257,7 @@
 
         const currentPersona = personaData[selectedId];
         
-        // 시스템 지시어를 대화 이력의 첫 배열에 주입하여 통신 규격 오류를 원천 차단합니다.
+        // 시스템 지시어를 대화 이력의 첫 배열에 주입하여 통신 규격 오류 원천 차단
         let chatHistory = [
             { role: "user", parts: [{ text: `[시스템 설정: ${currentPersona.instruction}] 이 설정에 완벽히 동화되어 철학자로서 대화를 시작해.` }] },
             { role: "model", parts: [{ text: "알겠습니다. 설정된 철학자의 사상, 어조, 문체를 완벽하게 체화하여 깊이 있는 사유를 전개하겠습니다." }] }
