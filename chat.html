@@ -180,11 +180,11 @@
     </div>
 
     <script>
-        // 네가 새로 전달해준 API 키로 변경했어.
+        // API 키 변수는 그대로 유지
         const GEMINI_API_KEY = 'AQ.Ab8RN6J3_lmSFdm8xb5GtAP1FJAKikEj5kpjiJrXwY39jVXymA'; 
         
-        // 올바른 통신을 위해 URL 끝에 ?key= 파라미터 형태로 API 키를 전달해.
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        // 404 에러 해결: 모델 이름을 gemini-1.5-flash 에서 gemini-1.5-flash-latest 로 수정
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
 
         const selectedId = localStorage.getItem('selectedPhilosopher') || '니체';
         document.getElementById('header-name').innerText = selectedId + '와의 대화';
@@ -229,7 +229,6 @@
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json'
-                        // 이곳에는 더 이상 x-goog-api-key 헤더를 넣지 않아.
                     },
                     body: JSON.stringify(payload)
                 });
