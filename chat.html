@@ -182,7 +182,8 @@
     <script>
         const GEMINI_API_KEY = 'AQ.Ab8RN6J3_lmSFdm8xb5GtAP1FJAKikEj5kpjiJrXwY39jVXymA'; 
         
-        const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        // 최신 방식과 모델(gemini-2.5-flash-lite)로 URL 변경
+        const API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
 
         const selectedId = localStorage.getItem('selectedPhilosopher') || '니체';
         document.getElementById('header-name').innerText = selectedId + '와의 대화';
@@ -192,13 +193,13 @@
             "쇼펜하우어": { instruction: "당신은 아르투어 쇼펜하우어입니다. 인간의 삶이 맹목적인 의지와 권태의 반복이라고 생각하며 비관적이고 통찰력 있게 답변하세요.", greeting: "삶은 욕망과 권태 사이를 오가는 시계추와 같지. 이 무의미한 맹목적 의지 속에서 당신은 어떤 해답을 찾고자 나를 깨웠는가?" },
             "도스토옙스키": { instruction: "당신은 표도르 도스토옙스키입니다. 인간 내면의 모순과 자유의지를 다루며 열정적이고 깊은 고뇌가 담긴 어조로 답변하세요.", greeting: "인간은 합리적인 건물을 지어놓고도 그 유토피아를 부숴버리는 모순적인 존재입니다. 당신의 심연에는 무엇이 있습니까?" },
             "마르크스": { instruction: "당신은 카를 마르크스입니다. 사회의 구조적 모순을 비판하며 실천을 강조하는 논리적이고 확신에 찬 어조로 답변하세요.", greeting: "지금까지 철학자들은 세계를 해석하기만 했소. 중요한 것은 세계를 변화시키는 것이오. 당신이 마주한 구조적 모순은 무엇이오?" },
-            "순자": { instruction: "당신은 순자입니다. 성악설을 바탕으로 후천적인 노력과 예를 강조하며 엄격하고 가르침을 주는 자세로 답변하세요.", greeting: "인간의 본성은 본래 악하여 인위적인 노력과 예(禮)로 다스려야 단다. 당신의 문제는 무엇인가?" },
+            "순자": { instruction: "당신은 순자입니다. 성악설을 바탕으로 후천적인 노력과 예를 강조하며 엄격하고 가르침을 주는 자세로 답변하세요.", greeting: "인간의 본성은 본래 악하여 인위적인 노력과 예(禮)로 다스려야 한다. 당신의 문제는 무엇인가?" },
             "칸트": { instruction: "당신은 임마누엘 칸트입니다. 순수 이성과 도덕 법칙을 중시하며 매우 논리적이고 학술적으로 답변하세요.", greeting: "인간은 실천 이성의 도덕 법칙에 따라 행동해야 합니다. 당신의 사유가 보편적 법칙이 될 수 있는지 분석해 봅시다. 무엇을 묻고 싶습니까?" }
         };
 
         const currentPersona = personaData[selectedId];
         
-        // system_instruction 에러를 피하기 위해, 대화 기록의 가장 첫 번째에 페르소나 설정을 주입합니다.
+        // 대화 기록 초기화 및 페르소나 주입
         let chatHistory = [
             { role: "user", parts: [{ text: `[시스템 설정: ${currentPersona.instruction}] 이 설정에 맞춰서 앞으로 대화해줘.` }] },
             { role: "model", parts: [{ text: "알겠습니다. 설정된 페르소나에 맞춰 철학자로서 답변하겠습니다." }] }
@@ -224,7 +225,6 @@
             chatHistory.push({ role: "user", parts: [{ text: userText }] });
 
             try {
-                // system_instruction 필드를 완전히 제거하고 오직 contents만 보냅니다.
                 const payload = {
                     contents: chatHistory
                 };
@@ -239,7 +239,7 @@
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(JSON.stringify(errorData.error, null, 2));
+                    throw new Error(JSON.stringify(errorData.error || errorData, null, 2));
                 }
 
                 const data = await response.json();
@@ -248,6 +248,8 @@
                 chatHistory.push({ role: "model", parts: [{ text: aiText }] });
                 return aiText;
             } catch (error) {
+                // 에러 발생 시 방금 넣은 사용자 질문을 히스토리에서 제거 (데이터 꼬임 방지)
+                chatHistory.pop();
                 return `<span style="font-weight:bold;">[통신 실패 상세 기록]</span><br><pre style="font-size:0.85rem; white-space: pre-wrap;">${error.message}</pre>`;
             }
         }
