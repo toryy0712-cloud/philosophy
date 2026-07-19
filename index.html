@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- PWA 메타 태그 추가 -->
+    <!-- PWA 메타 태그 (외부 이미지 의존성 제거) -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#121212">
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/192/bb86fc/000000?text=Phil">
     
     <title>사유의 도서관 - 철학자 선택</title>
     <style>
@@ -28,7 +27,6 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            /* 모바일 텍스트 드래그 방지(앱 느낌) */
             -webkit-user-select: none;
             user-select: none;
         }
@@ -139,10 +137,12 @@
     <div class="grid-container" id="philosophers-grid"></div>
 
     <script>
-        // 서비스 워커 등록 (웹 앱 기능 활성화)
+        // 서비스 워커 등록 (안전하게 처리)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js');
+                navigator.serviceWorker.register('/sw.js').catch(() => {
+                    console.log('서비스 워커 연동 대기 중');
+                });
             });
         }
 
@@ -160,10 +160,10 @@
         philosophers.forEach(p => {
             const card = document.createElement('div');
             card.className = 'philosopher-card';
-            // 카드 전체를 클릭 가능하게 변경 (모바일 앱 UX)
             card.onclick = () => startChat(p.id);
+            // 외부 사이트(via.placeholder.com) 의존성을 완전히 제거한 인라인 SVG 대체 이미지 적용
             card.innerHTML = `
-                <img src="${p.img}" alt="${p.name}" class="card-img" onerror="this.src='https://via.placeholder.com/300x220/2c2c2c/bb86fc?text=${p.id}'">
+                <img src="${p.img}" alt="${p.name}" class="card-img" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22220%22 style=%22background:%232c2c2c%22%3E%3Ctext fill=%22%23bb86fc%22 x=%2250%25%22 y=%2250%25%22 font-family=%22sans-serif%22 font-size=%2220%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22%3E${p.name}%3C/text%3E%3C/svg%3E'">
                 <div class="card-content">
                     <h2 class="card-name">${p.name}</h2>
                     <p class="card-desc">${p.desc}</p>
@@ -175,7 +175,7 @@
 
         function startChat(philosopherId) {
             localStorage.setItem('selectedPhilosopher', philosopherId);
-            window.location.href = '/chat'; // Vercel cleanUrls 적용 시
+            window.location.href = '/chat';
         }
     </script>
 </body>
