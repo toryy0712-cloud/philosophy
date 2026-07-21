@@ -217,10 +217,9 @@
 
     <script>
         // -------------------------------------------------------------
-        // [DeepSeek API 연동 설정 - deepseek-reasoner]
+        // [보안 백엔드 API 서버 호출 연동]
         // -------------------------------------------------------------
-        const DEEPSEEK_API_KEY = 'sk-d8442a04bb634ba48014fa1f681af04b';
-        const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
+        const API_URL = '/api/chat';
         const MODEL_NAME = 'deepseek-reasoner';
 
         const selectedId = localStorage.getItem('selectedPhilosopher') || '니체';
@@ -297,22 +296,25 @@
             }
 
             try {
-                const response = await fetch(DEEPSEEK_API_URL, {
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         model: MODEL_NAME,
-                        messages: chatHistory,
-                        max_tokens: 2048
+                        messages: chatHistory
                     })
                 });
 
                 if (!response.ok) {
                     const errData = await response.json().catch(() => ({}));
-                    throw new Error(errData.error?.message || `HTTP 상태 코드: ${response.status}`);
+                    const rawError = errData.error?.message || `HTTP 상태 코드: ${response.status}`;
+                    
+                    if (rawError.includes('Insufficient Balance')) {
+                        throw new Error('DeepSeek 계정 잔액이 부족합니다. platform.deepseek.com 결제 화면에서 충전을 완료해 주세요.');
+                    }
+                    throw new Error(rawError);
                 }
 
                 const data = await response.json();
@@ -325,7 +327,7 @@
                 return aiText;
             } catch (error) {
                 chatHistory.pop();
-                return `<span style="font-weight:bold; color:#ffdddd;">[통신 오류]</span> DeepSeek API 연동 중 문제가 발생했습니다.<br><br><b>오류 내용:</b> ${error.message}`;
+                return `<span style="font-weight:bold; color:#ffdddd;">[통신 오류]</span> API 연동 중 문제가 발생했습니다.<br><br><b>오류 내용:</b> ${error.message}`;
             }
         }
 
